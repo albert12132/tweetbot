@@ -29,8 +29,12 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// twitter
+var twitter = require('./server/twitter');
+
 app.get('/', routes.index);
-app.get('/users', user.list);
+app.get('/poll', twitter.poll);
+app.get('/:user', twitter.getTweets);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
