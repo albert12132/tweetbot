@@ -26,7 +26,9 @@ function poll(req, res) {
           getTweetsForUser(user);
         }
       }
-      res.end(JSON.stringify(users));
+      if (res) {
+        res.end(JSON.stringify(users));
+      }
     }
   });
 }
