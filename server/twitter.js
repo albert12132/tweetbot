@@ -79,6 +79,8 @@ function sendTweet(req, res) {
   function(error, data) {
     if (error) {
       console.log(error);
+    } else if (res) {
+      res.end(JSON.stringify(data));
     } else {
       console.log(data);
     }
