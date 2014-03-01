@@ -35,14 +35,15 @@ var twitter = require('./server/twitter');
 app.get('/', routes.index);
 app.get('/poll', twitter.poll);
 app.get('/:user', twitter.getTweets);
+app.get('/:user/:message', twitter.sendTweet);
 
-interval = setInterval(function() {
-  var date = new Date();
-  console.log(date.getSeconds());
-  if ( date.getSeconds() === 0 ) {
-    twitter.poll();
-  }
-}, 1000);
+// interval = setInterval(function() {
+//   var date = new Date();
+//   console.log(date.getSeconds());
+//   if ( date.getSeconds() === 0 ) {
+//     twitter.poll();
+//   }
+// }, 1000);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

@@ -66,5 +66,25 @@ function getTweets(req, res) {
   });
 };
 
+function sendTweet(req, res) {
+  user = req.params['user'];
+  message = req.params['message'];
+  console.log(accessToken);
+  console.log(accessSecret);
+  twitter.statuses("update", {
+    status: "@" + user + " " + message,
+  },
+  accessToken,
+  accessSecret,
+  function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(data);
+    }
+  });
+}
+
 exports.getTweets = getTweets
 exports.poll = poll
+exports.sendTweet = sendTweet
