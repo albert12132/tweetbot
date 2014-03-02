@@ -1,7 +1,7 @@
 var EOL = "\0"
 var SOL = "\2"
-var MAX_TWEET_LENGTH = 140 - " #tweetLIkeMe".length;
-var TWEET_SIGNATURE = "#tweetLikeMe";
+var TWEET_SIGNATURE = " #tweetLikeMe";
+var MAX_TWEET_LENGTH = 140 - TWEET_SIGNATURE.length;
 
 /**
  * Trains the tweetbot given list of tweets.
@@ -12,7 +12,8 @@ function trainTweetBot(tweetList) {
     for (var i=0; i<tweetList.length; i++) {
         var wordList = parseWords(tweetList[i]);
         updateWordCounts(nextWordCounts, wordList);
-    } return nextWordCounts;
+    }
+    return nextWordCounts;
 }
 
 /**
@@ -21,17 +22,13 @@ function trainTweetBot(tweetList) {
  **/
 function parseWords(tweet) {
     var tweetText = tweet.text;
-    tweetText = tweetText.replace(/(\W)/g, ' $1 ');
+    // tweetText = tweetText.replace(/(\W)/g, ' $1 '); // punctuation
     tweetText = SOL + " " + tweetText; 
 
     var wordList = tweetText.split(' ');
-    for (i=wordList.length-1; i >= 0; i--) {
-        wordList[i] = wordList[i].toLowerCase();
-        var word = wordList[i]
-        if (notValidWord(word)) {
-            wordList.splice(i, 1);
-        }
-    } return wordList;
+    return wordList.filter(function(word) {
+      return word != '' && !notValidWord(word);
+    });
 }
 
 /**
@@ -74,24 +71,19 @@ function updateWordCounts(dict, wordList) {
  * Processes recent tweets and returns a string of a tweet 
  * @params tweets json object of list of tweets
  * */
-function generateTweet(tweetList) {
-    var tweet = "";
+function generateTweet(user, tweetList) {
     var nextWordsDict = trainTweetBot(tweetList);
     var word = randomNextWord(nextWordsDict, SOL);
-    tweet += word;
-    while (tweet.length < MAX_TWEET_LENGTH) {
+    var tweet = word;
+    var max_tweet_length = MAX_TWEET_LENGTH - 1 - user.length;
+    while (tweet.length < max_tweet_length) {
         var nextWord = randomNextWord(nextWordsDict, word); 
-        if (tweet.length + nextWord.length + 1 > MAX_TWEET_LENGTH ||
+        if (tweet.length + nextWord.length + 1 > max_tweet_length ||
                 nextWord === EOL) {
             tweet += TWEET_SIGNATURE;
             break;
-        } 
-        var punctation = /\W/;
-        if (punctuation.test(nextWord)) {
-            tweet += nextWord;
-        } else {  
-            tweet += ' ' + nextWord;
-        } 
+        }
+        tweet += ' ' + nextWord;
         word = nextWord;
     }
     return tweet.trim();
@@ -120,11 +112,11 @@ function randomNextWord(dict, word) {
     }
 
     var rand = Math.random();
-    var prevProb = distribution[0][0];
     for (var i=1; i < distribution.length; i++) {
-        if (rand > prevProb) {
-            return distribution[i][1];
-        } prevProb = distribution[i][0]
+      prob = distribution[i][0];
+      if (rand < prob) {
+          return distribution[i-1][1];
+      }
     }
     return distribution[distribution.length - 1][1]
 }

@@ -34,10 +34,34 @@ var twitter = require('./server/twitter');
 
 app.get('/', routes.index);
 app.get('/poll', twitter.poll);
-app.get('/:user', twitter.generateTweet);
+app.get('/:user', function(req, res) {
+  user = req.params['user'];
+  twitter.generateTweet(user, function(message) {
+    res.end(message);
+  });
+});
 
-app.get('/api/get/:user', twitter.getTweets);
-app.get('/api/send/:user/:message', twitter.sendTweet);
+app.get('/api/get/:user', function(req, res) {
+  user = req.params['user'];
+  twitter.getTweets(user, function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      res.end(JSON.stringify(data));
+    }
+  });
+});
+app.get('/api/send/:user/:message', function(req, res) {
+  user = req.params['user'];
+  message = req.params['message'];
+  twitter.sendTweet(user, message, function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      res.end(JSON.stringify(data));
+    }
+  });
+});
 
 interval = setInterval(function() {
   var date = new Date();

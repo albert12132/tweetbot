@@ -25,92 +25,46 @@ function poll(req, res) {
       for (var i = 0; i < data.length; i++) {
         user = data[i].user.screen_name;
         time = new Date(Date.parse(data[i].created_at));
-        if (users.indexOf(user) == -1
-            && currentTime - time <= 60000
-            ) {
+        if (users.indexOf(user) == -1 && currentTime - time <= 60000) {
           users.push(data[i].user.screen_name);
-          req.user = user;
-          generateTweet(req, res);
+          generateTweet(user, function(message) {
+            res.write(message);
+          });
         }
       }
     }
   });
 }
 
-function getTweets(req, res, user) {
-  if (!user) {
-    user = req.params['user'];
-  }
-  twitter.getTimeline("user", {
-    screen_name: user,
-  },
-  accessToken,
-  accessSecret,
-  function(error, data) {
-    if (error) {
-      console.log(error);
-    } else {
-      res.end(JSON.stringify(data));
-    }
-  });
-};
-
-function generateTweet(req, res) {
-  user = req.params['user'];
+function getTweets(user, callback) {
   twitter.getTimeline("user", {
     screen_name: user,
     count: 200,
   },
   accessToken,
   accessSecret,
-  function(error, data) {
-    if (error) {
-      console.log(error);
-    } else {
-      tweet = bot.generateTweet(data);
-      tweet = "@" + user + " " + tweet;
-      sendTweetToUser(user, tweet);
-      if (res) {
-        console.log(user);
-        res.end(tweet);
-      }
-    }
-  });
+  callback);
 };
 
-
-function sendTweetToUser(user, message) {
-  twitter.statuses("update", {
-    status: message,
-  },
-  accessToken,
-  accessSecret,
-  function(error, data) {
+function generateTweet(user, callback) {
+  getTweets(user, function(error, data) {
     if (error) {
       console.log(error);
     } else {
-      console.log(data);
+      tweet = bot.generateTweet(user, data);
+      sendTweet(user, tweet, function() {});
+      callback(tweet);
     }
   });
 }
 
-function sendTweet(req, res) {
-  user = req.params['user'];
-  message = req.params['message'];
+function sendTweet(user, tweet, callback) {
   twitter.statuses("update", {
-    status: "@" + user + " " + message,
+    status: "@" + user + " " + tweet,
   },
   accessToken,
   accessSecret,
-  function(error, data) {
-    if (error) {
-      console.log(error);
-    } else if (res) {
-      res.end(JSON.stringify(data));
-    } else {
-      console.log(data);
-    }
-  });
+  callback);
 }
 
 exports.getTweets = getTweets
