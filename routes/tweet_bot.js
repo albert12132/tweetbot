@@ -139,5 +139,5 @@ function pickRandomProperty(obj) {
    return result;
 }
 
-
+exports.generateTweet = generateTweet
 

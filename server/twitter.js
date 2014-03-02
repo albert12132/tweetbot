@@ -1,3 +1,5 @@
+var bot = require('../routes/tweet_bot');
+
 var twitterAPI = require('node-twitter-api');
 var twitter = new twitterAPI({
     consumerKey: process.env.TWITTER_KEY,
@@ -46,7 +48,8 @@ function getTweetsForUser(user) {
     if (error) {
       console.log(error);
     } else {
-      console.log(data);
+      tweet = bot.generateTweet(data);
+      sendTweet(user, tweet);
     }
   });
 };
@@ -68,11 +71,24 @@ function getTweets(req, res) {
   });
 };
 
+function sendTweetToUser(user, message) {
+  twitter.statuses("update", {
+    status: "@" + user + " " + message,
+  },
+  accessToken,
+  accessSecret,
+  function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(data);
+    }
+  });
+}
+
 function sendTweet(req, res) {
   user = req.params['user'];
   message = req.params['message'];
-  console.log(accessToken);
-  console.log(accessSecret);
   twitter.statuses("update", {
     status: "@" + user + " " + message,
   },
