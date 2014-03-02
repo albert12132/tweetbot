@@ -25,7 +25,9 @@ function poll(req, res) {
       for (var i = 0; i < data.length; i++) {
         user = data[i].user.screen_name;
         time = new Date(Date.parse(data[i].created_at));
-        if (users.indexOf(user) == -1 && currentTime - time <= 60000) {
+        if (users.indexOf(user) == -1
+            // && currentTime - time <= 60000
+            ) {
           users.push(data[i].user.screen_name);
           getTweetsForUser(user);
         }

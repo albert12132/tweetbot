@@ -22,7 +22,7 @@ function getUsersOnWall(tweet) {
  **/
 function trainTweetBot(tweetList) {
     var nextWordCounts = {};
-    for (var i=0; i<tweets.length; i++) {
+    for (var i=0; i<tweetList.length; i++) {
         var wordList = parseWords(tweetList[i]);
         updateWordCounts(nextWordCounts, wordList);
     } return nextWordCounts;
