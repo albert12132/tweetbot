@@ -51,7 +51,7 @@ function getTweetsForUser(user) {
       console.log(error);
     } else {
       tweet = bot.generateTweet(data);
-      sendTweet(user, tweet);
+      sendTweetToUser(user, tweet);
     }
   });
 };

@@ -34,8 +34,8 @@ var twitter = require('./server/twitter');
 
 app.get('/', routes.index);
 app.get('/poll', twitter.poll);
-app.get('/:user', twitter.getTweets);
-app.get('/:user/:message', twitter.sendTweet);
+app.get('/get/:user', twitter.getTweets);
+app.get('/send/:user/:message', twitter.sendTweet);
 
 // interval = setInterval(function() {
 //   var date = new Date();
