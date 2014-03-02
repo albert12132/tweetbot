@@ -12,7 +12,6 @@ var accessSecret = process.env.ACCESS_SECRET;
 
 function poll(req, res) {
   twitter.getTimeline("mentions", {
-    count: 100,
   },
   accessToken,
   accessSecret,
@@ -26,41 +25,22 @@ function poll(req, res) {
         user = data[i].user.screen_name;
         time = new Date(Date.parse(data[i].created_at));
         if (users.indexOf(user) == -1
-            // && currentTime - time <= 60000
+            && currentTime - time <= 60000
             ) {
           users.push(data[i].user.screen_name);
-          getTweetsForUser(user);
+          generateTweet(req, res, user);
         }
-      }
-      if (res) {
-        res.end(JSON.stringify(users));
       }
     }
   });
 }
 
-function getTweetsForUser(user) {
+function getTweets(req, res, user) {
+  if (!user) {
+    user = req.params['user'];
+  }
   twitter.getTimeline("user", {
     screen_name: user,
-    count: 100,
-  },
-  accessToken,
-  accessSecret,
-  function(error, data) {
-    if (error) {
-      console.log(error);
-    } else {
-      tweet = bot.generateTweet(data);
-      sendTweetToUser(user, tweet);
-    }
-  });
-};
-
-function getTweets(req, res) {
-  user = req.params['user'];
-  twitter.getTimeline("user", {
-    screen_name: user,
-    count: 100,
   },
   accessToken,
   accessSecret,
@@ -72,6 +52,29 @@ function getTweets(req, res) {
     }
   });
 };
+
+function generateTweet(req, res, user) {
+  if (!user) {
+    user = req.params['user'];
+  }
+  twitter.getTimeline("user", {
+    screen_name: user,
+  },
+  accessToken,
+  accessSecret,
+  function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      tweet = bot.generateTweet(data);
+      sendTweetToUser(user, tweet);
+      if (res) {
+        res.end(tweet);
+      }
+    }
+  });
+};
+
 
 function sendTweetToUser(user, message) {
   twitter.statuses("update", {
@@ -110,3 +113,4 @@ function sendTweet(req, res) {
 exports.getTweets = getTweets
 exports.poll = poll
 exports.sendTweet = sendTweet
+exports.generateTweet = generateTweet
