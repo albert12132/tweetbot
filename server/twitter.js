@@ -28,7 +28,8 @@ function poll(req, res) {
             && currentTime - time <= 60000
             ) {
           users.push(data[i].user.screen_name);
-          generateTweet(req, res, user);
+          req.user = user;
+          generateTweet(req, res);
         }
       }
     }
@@ -53,10 +54,8 @@ function getTweets(req, res, user) {
   });
 };
 
-function generateTweet(req, res, user) {
-  if (!user) {
-    user = req.params['user'];
-  }
+function generateTweet(req, res) {
+  user = req.params['user'];
   twitter.getTimeline("user", {
     screen_name: user,
   },
@@ -67,8 +66,10 @@ function generateTweet(req, res, user) {
       console.log(error);
     } else {
       tweet = bot.generateTweet(data);
+      tweet = "@" + user + " " + tweet;
       sendTweetToUser(user, tweet);
       if (res) {
+        console.log(user);
         res.end(tweet);
       }
     }
@@ -78,7 +79,7 @@ function generateTweet(req, res, user) {
 
 function sendTweetToUser(user, message) {
   twitter.statuses("update", {
-    status: "@" + user + " " + message,
+    status: message,
   },
   accessToken,
   accessSecret,
