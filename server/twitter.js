@@ -12,6 +12,7 @@ var accessSecret = process.env.ACCESS_SECRET;
 
 function poll(req, res) {
   twitter.getTimeline("mentions", {
+    count: 200,
   },
   accessToken,
   accessSecret,
@@ -58,6 +59,7 @@ function generateTweet(req, res) {
   user = req.params['user'];
   twitter.getTimeline("user", {
     screen_name: user,
+    count: 200,
   },
   accessToken,
   accessSecret,
