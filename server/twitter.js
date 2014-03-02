@@ -28,7 +28,6 @@ function poll(req, res) {
         if (users.indexOf(user) == -1 && currentTime - time <= 60000) {
           users.push(data[i].user.screen_name);
           generateTweet(user, function(message) {
-            res.write(message);
           });
         }
       }
