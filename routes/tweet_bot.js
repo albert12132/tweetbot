@@ -74,9 +74,6 @@ function updateWordCounts(dict, wordList) {
     if (!dict.hasOwnProperty(word)) {
         dict[word] = {};
     }
-    console.log(wordList);
-    console.log(word);
-    console.log(nextWord);
     if (!dict[word].hasOwnProperty(String("EOL"))) {
         dict[word][EOL] = 0;
     } dict[word][EOL]++;
@@ -95,12 +92,12 @@ function generateTweet(tweetList) {
     while (tweet.length < MAX_TWEET_LENGTH) {
         var nextWord = randomNextWord(nextWordsDict, word);
         if (tweet.length + nextWord.length > MAX_TWEET_LENGTH ||
-                nextWord.equals(EOL)) {
+                nextWord === EOL) {
             break;
-        } tweet += nextWord;
+        } tweet += ' ' + nextWord;
         word = nextWord;
     }
-    return tweet;
+    return tweet.trim();
 }
 
 /**
@@ -126,12 +123,13 @@ function randomNextWord(dict, word) {
     }
 
     var rand = Math.random();
-    var prevProb = distribution[0][0]
+    var prevProb = distribution[0][0];
     for (var i=1; i < distribution.length; i++) {
         if (rand > prevProb) {
             return distribution[i][1];
         } prevProb = distribution[i][0]
     }
+    return distribution[distribution.length - 1][1]
 }
 
 function pickRandomProperty(obj) {
