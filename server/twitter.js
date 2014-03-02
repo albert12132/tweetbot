@@ -19,14 +19,18 @@ function poll(req, res) {
       console.log(error);
     } else {
       users = [];
+      currentTime = Date.now();
       for (var i = 0; i < data.length; i++) {
         user = data[i].user.screen_name;
-        if (users.indexOf(user) == -1) {
+        time = new Date(Date.parse(data[i].created_at));
+        if (users.indexOf(user) == -1 && currentTime - time <= 60000) {
           users.push(data[i].user.screen_name);
           getTweetsForUser(user);
         }
       }
-      res.end(JSON.stringify(users));
+      if (res) {
+        res.end(JSON.stringify(users));
+      }
     }
   });
 }
@@ -64,5 +68,27 @@ function getTweets(req, res) {
   });
 };
 
+function sendTweet(req, res) {
+  user = req.params['user'];
+  message = req.params['message'];
+  console.log(accessToken);
+  console.log(accessSecret);
+  twitter.statuses("update", {
+    status: "@" + user + " " + message,
+  },
+  accessToken,
+  accessSecret,
+  function(error, data) {
+    if (error) {
+      console.log(error);
+    } else if (res) {
+      res.end(JSON.stringify(data));
+    } else {
+      console.log(data);
+    }
+  });
+}
+
 exports.getTweets = getTweets
 exports.poll = poll
+exports.sendTweet = sendTweet
