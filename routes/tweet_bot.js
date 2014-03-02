@@ -1,20 +1,7 @@
 var EOL = "\0"
-var MAX_TWEET_LENGTH = 140;
-
-/**
- * Gets list of user ids tweeted to our account.
- * @params tweet json object of tweet
- **/
-function getUsersOnWall(tweet) {
-    var userIds = [];
-    for (var i =0; i < tweet.length; i++) {
-        var mentions = tweet[i].entities.user_mentions;
-        for (var j=0; j<mentions.length; j++) {
-            userIds.append(mentions[j].id_str);
-        }
-    }
-    return userIds;
-}
+var SOL = "\2"
+var MAX_TWEET_LENGTH = 140 - " #tweetLIkeMe".length;
+var TWEET_SIGNATURE = "#tweetLikeMe";
 
 /**
  * Trains the tweetbot given list of tweets.
@@ -34,11 +21,14 @@ function trainTweetBot(tweetList) {
  **/
 function parseWords(tweet) {
     var tweetText = tweet.text;
+    tweetText = tweetText.replace(/(\W)/g, ' $1 ');
+    tweetText = SOL + " " + tweetText; 
+
     var wordList = tweetText.split(' ');
     for (i=wordList.length-1; i >= 0; i--) {
         wordList[i] = wordList[i].toLowerCase();
         var word = wordList[i]
-        if (!isValidWord(word)) {
+        if (notValidWord(word)) {
             wordList.splice(i, 1);
         }
     } return wordList;
@@ -48,8 +38,8 @@ function parseWords(tweet) {
  * Returns true if the word is a valid word.
  * Return false i the word matches '@*'
  **/
-function isValidWord(word) {
-    var userRegex = new RegExp("[^@].*")
+function notValidWord(word) {
+    var userRegex = new RegExp("@.*")
     return userRegex.test(word)
 }
 
@@ -81,20 +71,27 @@ function updateWordCounts(dict, wordList) {
 
 
 /**
- * Processes last X tweets and returns a string tweet
+ * Processes recent tweets and returns a string of a tweet 
  * @params tweets json object of list of tweets
  * */
 function generateTweet(tweetList) {
     var tweet = "";
     var nextWordsDict = trainTweetBot(tweetList);
-    var word = pickRandomProperty(nextWordsDict);
+    var word = randomNextWord(nextWordsDict, SOL);
     tweet += word;
     while (tweet.length < MAX_TWEET_LENGTH) {
-        var nextWord = randomNextWord(nextWordsDict, word);
-        if (tweet.length + nextWord.length > MAX_TWEET_LENGTH ||
+        var nextWord = randomNextWord(nextWordsDict, word); 
+        if (tweet.length + nextWord.length + 1 > MAX_TWEET_LENGTH ||
                 nextWord === EOL) {
+            tweet += TWEET_SIGNATURE;
             break;
-        } tweet += ' ' + nextWord;
+        } 
+        var punctation = /\W/;
+        if (punctuation.test(nextWord)) {
+            tweet += nextWord;
+        } else {  
+            tweet += ' ' + nextWord;
+        } 
         word = nextWord;
     }
     return tweet.trim();
@@ -130,17 +127,6 @@ function randomNextWord(dict, word) {
         } prevProb = distribution[i][0]
     }
     return distribution[distribution.length - 1][1]
-}
-
-function pickRandomProperty(obj) {
-   var result;
-   var count = 0;
-   for (var prop in obj) {
-        if (Math.random() < 1/++count) {
-            result = prop;
-        }
-   }
-   return result;
 }
 
 exports.generateTweet = generateTweet
