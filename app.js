@@ -4,8 +4,6 @@
  */
 
 var express = require('express');
-var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
@@ -32,12 +30,12 @@ if ('development' == app.get('env')) {
 // twitter
 var twitter = require('./server/twitter');
 
-app.get('/', routes.index);
-app.get('/poll', twitter.poll);
-app.get('/:user', function(req, res) {
+app.get('/', function(req, res) {res.render('index')});
+app.get('/api/poll', twitter.poll);
+app.get('/api/gen/:user', function(req, res) {
   user = req.params['user'];
   twitter.generateTweet(user, function(message) {
-    res.end(message);
+    res.send("<p>@" + user + " " + message + "</p>");
   });
 });
 
@@ -47,7 +45,12 @@ app.get('/api/get/:user', function(req, res) {
     if (error) {
       console.log(error);
     } else {
-      res.end(JSON.stringify(data));
+      data = data.map(function(tweet) {
+        return "<div class='tweet-box'><span class='tweet-time'>"
+          + tweet.created_at + "</span><p class='tweet-text'>"
+          + tweet.text + "</p></div>";
+      });
+      res.send(data.join('\n'));
     }
   });
 });

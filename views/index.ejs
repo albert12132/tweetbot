@@ -2,10 +2,19 @@
 <html>
   <head>
     <title>Tweet Like Me</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/css/style.css' />
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <Script src="/js/index.js"></script>
   </head>
   <body>
     <h1>Tweet Like Me</h1>
     <p>Send tweets to <a href='https://twitter.com/TweetLikeMeBot'>@TweetLikeMeBot</a></p>
+
+    <p>Or, enter a username below to generate a tweet for them:</p>
+    <label>Twitter User</label> <input name='user'>
+    <button id='button-get'>View recent tweets</button>
+    <button id='button-generate'>Generate!</button>
+    <div id='tweet-result'></div>
+    <div id='tweet-list'></div>
   </body>
 </html>

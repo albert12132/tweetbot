@@ -39,6 +39,8 @@ function getTweets(user, callback) {
   twitter.getTimeline("user", {
     screen_name: user,
     count: 200,
+    exclude_replies: true,
+    include_rts: false,
   },
   accessToken,
   accessSecret,
