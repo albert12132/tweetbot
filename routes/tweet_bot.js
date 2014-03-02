@@ -1,9 +1,11 @@
+var EOL = "\0"
+var MAX_TWEET_LENGTH = 140;
 
 /**
  * Gets list of user ids tweeted to our account.
  * @params tweet json object of tweet
  **/
-function getTweetUsers(tweet) {
+function getUsersOnWall(tweet) {
     var userIds = []; 
     for (var i =0; i < tweet.length; i++) {
         var mentions = tweet[i].entities.user_mentions;
@@ -69,6 +71,9 @@ function updateWordCounts(dict, wordList) {
         dict[word][nextWord]++; 
         word = nextWord;
     } 
+    if (!dict[word].hasOwnProperty(String("EOL"))) {
+        dict[word][EOL] = 0; 
+    } dict[word][EOL]++;
 }
 
 
@@ -76,6 +81,63 @@ function updateWordCounts(dict, wordList) {
  * Processes last X tweets and returns a string tweet
  * @params tweets json object of list of tweets 
  * */
-function generateTweet() {
-        
+function generateTweet(tweetList) {
+    var tweet = ""
+    var nextWordsDict = trainTweetBot(tweetList);   
+    var word = pickRandomProperty(nextWordsDict);
+    tweet += word;
+    while (tweet.length < MAX_TWEET_LENGTH) {
+        var nextWord = randomNextWord(nextWordsDict, word);
+        if (tweet.length + nextWord.length > TWEET_MAX_LENGTH ||
+                nextWord.equals(EOL)) {
+            break; 
+        } tweet += nextWord; 
+        word = nextWord;
+    } 
+    return tweet; 
+}
+
+/**
+ * Returns a random word that follows input 'word' 
+ * based on probability distribution.
+ * @params dict object
+ * @params word String 
+ * */
+function randomNextWord(dict, word) {
+    var distribution = [];
+    var nextWords = dict[word]; 
+    var totalWords = 0;
+    var cumulativeProb = 0.0;
+     
+    for (var nextWord in nextWords) {
+        totalWords += nextWords[nextWord];
+    } 
+   
+    for (var nextWord in nextWords) {
+        var prob = nextWords[nextWord]/totalWords;
+        distribution.push([cumulativeProb,nextWord]); 
+        cumulativeProb += prob; 
+    } 
+
+    var rand = Math.random();
+    var prevProb = distribution[0][0] 
+    for (var i=1; i < distribution.length; i++) {
+        if (rand > prevProb) {
+            return distribution[i][1];
+        } prevProb = distribution[i][0]  
+    } 
 } 
+
+function pickRandomProperty(obj) {
+   var result;
+   var count = 0;
+   for (var prop in obj) {
+        if (Math.random() < 1/++count) {
+            result = prop;
+        }
+   } 
+   return result;
+}
+
+
+
